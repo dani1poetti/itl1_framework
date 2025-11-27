@@ -53,5 +53,9 @@
                 <?php } ?>
             </table>
         </div>
+        <div class="register-box">
+            <h2>Account erstellen ?</h2>
+            <a href="<?php echo Config::get('URL'); ?>register/index">Register</a>
+        </div>
     </div>
 </div>

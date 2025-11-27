@@ -1,5 +1,11 @@
 <div class="container">
 
+    // Nur admin darf erstellen
+    <?php if (Session::get("user_account_type") != 7) : ?>
+        <p>Nur Administratoren dürfen neue Benutzer anlegen. Bitte wenden Sie sich an den Administrator</p>
+        <?php return; ?>
+    <?php endif; ?>
+
     <!-- echo out the system feedback (error and success messages) -->
     <?php $this->renderFeedbackMessages(); ?>
 
@@ -16,14 +22,22 @@
             <input type="password" name="user_password_new" pattern=".{6,}" placeholder="Password (6+ characters)" required autocomplete="off" />
             <input type="password" name="user_password_repeat" pattern=".{6,}" required placeholder="Repeat your password" autocomplete="off" />
 
-            <!-- show the captcha by calling the login/showCaptcha-method in the src attribute of the img tag -->
+            // User anlegen nur durch Admin
+            <select name="user_account_type">
+                <option value="1">Basic</option>
+                <option value="2">Premium</option>
+                <option value="7">Administrator</option>
+            </select>
+
+            <!-- Captcha entfernen
+            show the captcha by calling the login/showCaptcha-method in the src attribute of the img tag
             <img id="captcha" src="<?php echo Config::get('URL'); ?>register/showCaptcha" />
             <input type="text" name="captcha" placeholder="Please enter above characters" required />
 
-            <!-- quick & dirty captcha reloader -->
+            quick & dirty captcha reloader
             <a href="#" style="display: block; font-size: 11px; margin: 5px 0 15px 0; text-align: center"
-               onclick="document.getElementById('captcha').src = '<?php echo Config::get('URL'); ?>register/showCaptcha?' + Math.random(); return false">Reload Captcha</a>
-
+               onclick="document.getElementById('captcha').src = '<?php echo Config::get('URL'); ?>////register/showCaptcha?' + Math.random(); return false">Reload Captcha</a>
+            -->
             <input type="submit" value="Register" />
         </form>
     </div>

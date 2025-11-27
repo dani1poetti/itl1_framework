@@ -10,8 +10,43 @@
     <option name="highlightLevel" value="WARNING" />
     <option name="transferred" value="true" />
   </component>
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/huge/vendor/gregwar/captcha" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpspec/prophecy" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpunit/php-code-coverage" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpunit/php-file-iterator" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpunit/php-text-template" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpunit/php-timer" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpunit/php-token-stream" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpunit/phpunit" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpunit/phpunit-mock-objects" />
+      <path value="$PROJECT_DIR$/huge/vendor/symfony/finder" />
+      <path value="$PROJECT_DIR$/huge/vendor/symfony/polyfill-ctype" />
+      <path value="$PROJECT_DIR$/huge/vendor/symfony/yaml" />
+      <path value="$PROJECT_DIR$/huge/vendor/doctrine/instantiator" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpmailer/phpmailer" />
+      <path value="$PROJECT_DIR$/huge/vendor/sebastian/comparator" />
+      <path value="$PROJECT_DIR$/huge/vendor/sebastian/diff" />
+      <path value="$PROJECT_DIR$/huge/vendor/sebastian/environment" />
+      <path value="$PROJECT_DIR$/huge/vendor/sebastian/exporter" />
+      <path value="$PROJECT_DIR$/huge/vendor/composer" />
+      <path value="$PROJECT_DIR$/huge/vendor/sebastian/global-state" />
+      <path value="$PROJECT_DIR$/huge/vendor/sebastian/recursion-context" />
+      <path value="$PROJECT_DIR$/huge/vendor/sebastian/version" />
+      <path value="$PROJECT_DIR$/huge/vendor/phpdocumentor/reflection-docblock" />
+    </include_path>
+  </component>
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.0">
+    <option name="suggestChangeDefaultLanguageLevel" value="false" />
+  </component>
   <component name="PhpStanOptionsConfiguration">
     <option name="transferred" value="true" />
+  </component>
+  <component name="PhpUnit">
+    <phpunit_settings>
+      <PhpUnitSettings configuration_file_path="$PROJECT_DIR$/huge/tests/phpunit.xml" custom_loader_path="$PROJECT_DIR$/huge/vendor/autoload.php" use_configuration_file="true" />
+    </phpunit_settings>
   </component>
   <component name="PsalmOptionsConfiguration">
     <option name="transferred" value="true" />

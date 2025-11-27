@@ -22,7 +22,8 @@ class RegisterController extends Controller
      */
     public function index()
     {
-        if (LoginModel::isUserLoggedIn()) {
+        // Nur admin darf auch register seite
+        if (Session::get("user_account_type") != 7) {
             Redirect::home();
         } else {
             $this->View->render('register/index');

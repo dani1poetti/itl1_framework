@@ -21,6 +21,8 @@ class RegistrationModel
         $user_email_repeat = strip_tags(Request::post('user_email_repeat'));
         $user_password_new = Request::post('user_password_new');
         $user_password_repeat = Request::post('user_password_repeat');
+        // Account Type holen
+        $user_account_type = (int) $_POST['user_account_type'];
 
         // stop registration flow if registrationInputValidation() returns false (= anything breaks the input check rules)
         $validation_result = self::registrationInputValidation(Request::post('captcha'), $user_name, $user_password_new, $user_password_repeat, $user_email, $user_email_repeat);
@@ -54,7 +56,7 @@ class RegistrationModel
         $user_activation_hash = sha1(uniqid(mt_rand(), true));
 
         // write user data to database
-        if (!self::writeNewUserToDatabase($user_name, $user_password_hash, $user_email, time(), $user_activation_hash)) {
+        if (!self::writeNewUserToDatabase($user_name, $user_password_hash, $user_email, time(), $user_activation_hash, $user_account_type)) {
             Session::add('feedback_negative', Text::get('FEEDBACK_ACCOUNT_CREATION_FAILED'));
             return false; // no reason not to return false here
         }
@@ -95,11 +97,12 @@ class RegistrationModel
     {
         $return = true;
 
-        // perform all necessary checks
-        if (!CaptchaModel::checkCaptcha($captcha)) {
-            Session::add('feedback_negative', Text::get('FEEDBACK_CAPTCHA_WRONG'));
-            $return = false;
-        }
+//         Captcha entfernen
+//        // perform all necessary checks
+//        if (!CaptchaModel::checkCaptcha($captcha)) {
+//            Session::add('feedback_negative', Text::get('FEEDBACK_CAPTCHA_WRONG'));
+//            $return = false;
+//        }
 
         // if username, email and password are all correctly validated, but make sure they all run on first sumbit
         if (self::validateUserName($user_name) AND self::validateUserEmail($user_email, $user_email_repeat) AND self::validateUserPassword($user_password_new, $user_password_repeat) AND $return) {
@@ -197,30 +200,51 @@ class RegistrationModel
      * @param $user_email
      * @param $user_creation_timestamp
      * @param $user_activation_hash
+     * @param $user_account_type
      *
      * @return bool
      */
-    public static function writeNewUserToDatabase($user_name, $user_password_hash, $user_email, $user_creation_timestamp, $user_activation_hash)
+    public static function writeNewUserToDatabase($user_name, $user_password_hash, $user_email, $user_creation_timestamp, $user_activation_hash, $user_account_type)
     {
+        // Account gleich direkt aktivieren
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        // write new users data into database
-        $sql = "INSERT INTO users (user_name, user_password_hash, user_email, user_creation_timestamp, user_activation_hash, user_provider_type)
-                    VALUES (:user_name, :user_password_hash, :user_email, :user_creation_timestamp, :user_activation_hash, :user_provider_type)";
+        $sql = "INSERT INTO users (user_name, user_password_hash, user_email, user_creation_timestamp, user_active, user_provider_type, user_account_type)
+            VALUES (:user_name, :user_password_hash, :user_email, :user_creation_timestamp, 1, :user_provider_type, :user_account_type)";
         $query = $database->prepare($sql);
-        $query->execute(array(':user_name' => $user_name,
-                              ':user_password_hash' => $user_password_hash,
-                              ':user_email' => $user_email,
-                              ':user_creation_timestamp' => $user_creation_timestamp,
-                              ':user_activation_hash' => $user_activation_hash,
-                              ':user_provider_type' => 'DEFAULT'));
-        $count =  $query->rowCount();
-        if ($count == 1) {
-            return true;
-        }
 
-        return false;
+        $query->execute([
+            ':user_name' => $user_name,
+            ':user_password_hash' => $user_password_hash,
+            ':user_email' => $user_email,
+            ':user_creation_timestamp' => $user_creation_timestamp,
+            ':user_provider_type' => 'DEFAULT',
+            ':user_account_type'  => $user_account_type
+        ]);
+
+        return $query->rowCount() === 1;
     }
+
+
+//        $database = DatabaseFactory::getFactory()->getConnection();
+//
+//        // write new users data into database
+//        $sql = "INSERT INTO users (user_name, user_password_hash, user_email, user_creation_timestamp, user_activation_hash, user_provider_type)
+//                    VALUES (:user_name, :user_password_hash, :user_email, :user_creation_timestamp, :user_activation_hash, :user_provider_type)";
+//        $query = $database->prepare($sql);
+//        $query->execute(array(':user_name' => $user_name,
+//                              ':user_password_hash' => $user_password_hash,
+//                              ':user_email' => $user_email,
+//                              ':user_creation_timestamp' => $user_creation_timestamp,
+//                              ':user_activation_hash' => $user_activation_hash,
+//                              ':user_provider_type' => 'DEFAULT'));
+//        $count =  $query->rowCount();
+//        if ($count == 1) {
+//            return true;
+//        }
+//
+//        return false;
+//    }
 
     /**
      * Deletes the user from users table. Currently used to rollback a registration when verification mail sending
@@ -248,21 +272,23 @@ class RegistrationModel
      */
     public static function sendVerificationEmail($user_id, $user_email, $user_activation_hash)
     {
-        $body = Config::get('EMAIL_VERIFICATION_CONTENT') . Config::get('URL') . Config::get('EMAIL_VERIFICATION_URL')
-                . '/' . urlencode($user_id) . '/' . urlencode($user_activation_hash);
-
-        $mail = new Mail;
-        $mail_sent = $mail->sendMail($user_email, Config::get('EMAIL_VERIFICATION_FROM_EMAIL'),
-            Config::get('EMAIL_VERIFICATION_FROM_NAME'), Config::get('EMAIL_VERIFICATION_SUBJECT'), $body
-        );
-
-        if ($mail_sent) {
-            Session::add('feedback_positive', Text::get('FEEDBACK_VERIFICATION_MAIL_SENDING_SUCCESSFUL'));
-            return true;
-        } else {
-            Session::add('feedback_negative', Text::get('FEEDBACK_VERIFICATION_MAIL_SENDING_ERROR') . $mail->getError() );
-            return false;
-        }
+//        Verifzierung mit E-Mail löschen
+//        $body = Config::get('EMAIL_VERIFICATION_CONTENT') . Config::get('URL') . Config::get('EMAIL_VERIFICATION_URL')
+//                . '/' . urlencode($user_id) . '/' . urlencode($user_activation_hash);
+//
+//        $mail = new Mail;
+//        $mail_sent = $mail->sendMail($user_email, Config::get('EMAIL_VERIFICATION_FROM_EMAIL'),
+//            Config::get('EMAIL_VERIFICATION_FROM_NAME'), Config::get('EMAIL_VERIFICATION_SUBJECT'), $body
+//        );
+//
+//        if ($mail_sent) {
+//            Session::add('feedback_positive', Text::get('FEEDBACK_VERIFICATION_MAIL_SENDING_SUCCESSFUL'));
+//            return true;
+//        } else {
+//            Session::add('feedback_negative', Text::get('FEEDBACK_VERIFICATION_MAIL_SENDING_ERROR') . $mail->getError() );
+//            return false;
+//        }
+        return true;
     }
 
     /**
