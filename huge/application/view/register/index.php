@@ -22,12 +22,15 @@
             <input type="password" name="user_password_new" pattern=".{6,}" placeholder="Password (6+ characters)" required autocomplete="off" />
             <input type="password" name="user_password_repeat" pattern=".{6,}" required placeholder="Repeat your password" autocomplete="off" />
 
-            // User anlegen nur durch Admin
+<!--            Mögliche User-Rollen anzeigen-->
             <select name="user_account_type">
-                <option value="1">Basic</option>
-                <option value="2">Premium</option>
-                <option value="7">Administrator</option>
+                <?php foreach ($this->bezeichnung as $type): ?>
+                    <option value="<?= $type->users_type ?>">
+                        <?= htmlspecialchars($type->bezeichnung) ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
+
 
             <!-- Captcha entfernen
             show the captcha by calling the login/showCaptcha-method in the src attribute of the img tag

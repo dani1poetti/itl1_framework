@@ -117,6 +117,14 @@ class View
         return false;
     }
 
+//    Wenn User admin -> true zurückgeben
+    public static function checkForAdmin()
+    {
+        $type = Session::get("user_account_type");
+        return ($type == 7);
+    }
+
+
     /**
      * Checks if the passed string is the currently active controller-action (=method).
      * Useful for handling the navigation's active/non-active link.

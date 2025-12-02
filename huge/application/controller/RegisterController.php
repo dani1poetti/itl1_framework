@@ -28,6 +28,14 @@ class RegisterController extends Controller
         } else {
             $this->View->render('register/index');
         }
+
+        //User-Rolle laden
+        $types = RegistrationModel::getRollen();
+
+        // User-Rolle an View übergeben
+        $this->View->render("register/index", [
+            "bezeichnung" => $types
+        ]);
     }
 
     /**

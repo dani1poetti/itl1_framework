@@ -316,4 +316,16 @@ class RegistrationModel
         Session::add('feedback_negative', Text::get('FEEDBACK_ACCOUNT_ACTIVATION_FAILED'));
         return false;
     }
+
+    public static function getRollen()
+    {
+        $database = DatabaseFactory::getFactory()->getConnection();
+
+        $sql = "SELECT users_type, bezeichnung FROM user_type_text";
+        $query = $database->prepare($sql);
+        $query->execute();
+
+        return $query->fetchAll();
+    }
+
 }
