@@ -45,6 +45,21 @@ class AdminModel
         }
     }
 
+    public static function updateUserType($user_account_type, $userId) {
+        // Prevent to suspend or delete own account.
+        // If admin suspend or delete own account will not be able to do any action.
+        if ($userId == Session::get('user_id')) {
+            Session::add('feedback_negative', Text::get('FEEDBACK_ACCOUNT_CANT_DELETE_SUSPEND_OWN'));
+            return false;
+        }
+
+        // nur ausführen, wenn ein Wert übergeben wurde
+        if ($user_account_type !== null) {
+            return self::updateUserTypeDB($user_account_type, $userId);
+        }
+
+    }
+
     /**
      * Simply write the deletion and suspension info for the user into the database, also puts feedback into session
      *
@@ -92,4 +107,21 @@ class AdminModel
             return true;
         }
     }
+
+    private static function updateUserTypeDB($userType, $userId)
+    {
+        $database = DatabaseFactory::getFactory()->getConnection();
+
+        $sql = "UPDATE users
+            SET user_account_type = :user_account_type
+            WHERE user_id = :user_id
+            LIMIT 1";
+
+        $query = $database->prepare($sql);
+        return $query->execute([
+            ':user_account_type' => $userType,
+            ':user_id' => $userId
+        ]);
+    }
+
 }

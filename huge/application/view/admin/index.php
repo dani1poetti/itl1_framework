@@ -20,9 +20,10 @@
                     <td>Avatar</td>
                     <td>Username</td>
                     <td>User's email</td>
+                    <td>User Type</td>
                     <td>Activated ?</td>
                     <td>Link to user's profile</td>
-                    <td>suspension Time in days</td>
+                    <td>Suspension Time in days</td>
                     <td>Soft delete</td>
                     <td>Submit</td>
                 </tr>
@@ -39,11 +40,29 @@
                         <td><?= $user->user_email; ?></td>
                         <td><?= ($user->user_active == 0 ? 'No' : 'Yes'); ?></td>
                         <td>
-                            <a href="<?= Config::get('URL') . 'profile/showProfile/' . $user->user_id; ?>">Profile</a>
+                            <a href="<?= Config::get('URL') . 'profile/showProfile/' . $user->user_id; ?>">
+                                Profile
+                            </a>
                         </td>
                         <form action="<?= config::get("URL"); ?>admin/actionAccountSettings" method="post">
-                            <td><input type="number" name="suspension" /></td>
-                            <td><input type="checkbox" name="softDelete" <?php if ($user->user_deleted) { ?> checked <?php } ?> /></td>
+                            <!-- Aktueller User-Type vorbelgen -->
+                            <td>
+                                <select name="user_account_type">
+                                    <?php foreach ($this->user_types as $type): ?>
+                                        <option value="<?= $type->users_type ?>"
+                                                <?= ($type->users_type == $user->user_account_type) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($type->bezeichnung) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" name="suspension" />
+                            </td>
+                            <td>
+                                <input type="checkbox" name="softDelete"
+                                        <?php if ($user->user_deleted) { ?> checked <?php } ?> />
+                            </td>
                             <td>
                                 <input type="hidden" name="user_id" value="<?= $user->user_id; ?>" />
                                 <input type="submit" />
@@ -53,6 +72,7 @@
                 <?php } ?>
             </table>
         </div>
+
         <div class="register-box">
             <h2>Account erstellen ?</h2>
             <a href="<?php echo Config::get('URL'); ?>register/index">Register</a>

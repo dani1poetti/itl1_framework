@@ -1,6 +1,6 @@
 <div class="container">
 
-    // Nur admin darf erstellen
+<!--    Nur admin darf erstellen-->
     <?php if (Session::get("user_account_type") != 7) : ?>
         <p>Nur Administratoren dürfen neue Benutzer anlegen. Bitte wenden Sie sich an den Administrator</p>
         <?php return; ?>

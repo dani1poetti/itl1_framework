@@ -25,16 +25,15 @@ class RegisterController extends Controller
         // Nur admin darf auch register seite
         if (Session::get("user_account_type") != 7) {
             Redirect::home();
-        } else {
-            $this->View->render('register/index');
+            return;
         }
 
         //User-Rolle laden
-        $types = RegistrationModel::getRollen();
+        $bezeichnung = RegistrationModel::getRollen();
 
         // User-Rolle an View übergeben
         $this->View->render("register/index", [
-            "bezeichnung" => $types
+            "bezeichnung" => $bezeichnung
         ]);
     }
 

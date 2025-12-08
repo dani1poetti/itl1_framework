@@ -20,7 +20,8 @@ class AdminController extends Controller
     public function index()
     {
         $this->View->render('admin/index', array(
-                'users' => UserModel::getPublicProfilesOfAllUsers())
+                'users' => UserModel::getPublicProfilesOfAllUsers(),
+                'user_types' => RegistrationModel::getRollen())
         );
     }
 
@@ -29,6 +30,7 @@ class AdminController extends Controller
         AdminModel::setAccountSuspensionAndDeletionStatus(
             Request::post('suspension'), Request::post('softDelete'), Request::post('user_id')
         );
+        AdminModel::updateUserType(Request::post('user_account_type'), Request::post('user_id'));
 
         Redirect::to("admin");
     }
