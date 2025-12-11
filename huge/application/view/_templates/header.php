@@ -8,6 +8,27 @@
     <link rel="icon" href="data:;base64,=">
     <!-- CSS -->
     <link rel="stylesheet" href="<?php echo Config::get('URL'); ?>css/style.css" />
+
+    <!-- jQuery und DataTables einfügen -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJ5lG6GXsFhXkPfkLksyn7OyeDvej/mdw="
+            crossorigin="anonymous"></script>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+    <!-- DataTables JS -->
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <!-- Init DataTable -->
+    <script>
+        $(document).ready(function () {
+            $('.js-table').DataTable();
+        });
+    </script>
+
 </head>
 <body>
     <!-- wrapper, to center website -->
@@ -47,6 +68,9 @@
                     </li>
                 <?php endif; ?>
             <?php } ?>
+            <li <?php if (View::checkForActiveController($filename, "messager")) { echo ' class="active" '; } ?> >
+                <a href="<?php echo Config::get('URL'); ?>messager/index">Messager</a>
+            </li>
         </ul>
 
         <!-- my account -->
