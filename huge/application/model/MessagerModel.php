@@ -14,7 +14,22 @@ class MessagerModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "SELECT * FROM messages WHERE sender_id = :user_id";
+        $sql = "
+        SELECT 
+            m.id,
+            m.sender_id,
+            sender.user_name AS sender_name,
+            m.empfaenger_id,
+            empfaenger.user_name AS empfaenger_name,
+            m.text,
+            m.timestamp,
+            m.gelesen
+        FROM messages m
+        JOIN users sender ON sender.user_id = m.sender_id
+        JOIN users empfaenger ON empfaenger.user_id = m.empfaenger_id
+        WHERE m.empfaenger_id = :user_id
+        ORDER BY m.timestamp DESC
+    ";
         $query = $database->prepare($sql);
         $query->execute(array(':user_id' => Session::get('user_id')));
 

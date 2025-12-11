@@ -27,10 +27,12 @@ class MessagerController extends Controller
         $currentUserId = Session::get('user_id');
 
         $users = MessagerModel::getAllOtherUsers($currentUserId);
+        $messages = MessagerModel::getAllMessageByUser();
 
         $this->View->render('messager/index', array(
             'messager' => MessagerModel::getAllMessageByUser(),
-            'users' => $users
+            'users' => $users,
+            'messages' => $messages
         ));
     }
 

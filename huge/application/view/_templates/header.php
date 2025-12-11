@@ -68,9 +68,11 @@
                     </li>
                 <?php endif; ?>
             <?php } ?>
-            <li <?php if (View::checkForActiveController($filename, "messager")) { echo ' class="active" '; } ?> >
-                <a href="<?php echo Config::get('URL'); ?>messager/index">Messager</a>
-            </li>
+            <?php if (Session::userIsLoggedIn()) { ?>
+                <li <?php if (View::checkForActiveController($filename, "messager")) { echo ' class="active" '; } ?> >
+                    <a href="<?php echo Config::get('URL'); ?>messager/index">Messager</a>
+                </li>
+            <?php } ?>
         </ul>
 
         <!-- my account -->
