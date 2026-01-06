@@ -1,15 +1,8 @@
 <?php
 
-/**
- * NoteModel
- * This is basically a simple CRUD (Create/Read/Update/Delete) demonstration.
- */
 class MessagerModel
 {
-    /**
-     * Get all notes (notes are just example data that the user has created)
-     * @return array an array with several objects (the results)
-     */
+
     public static function getAllMessageByUser()
     {
         $database = DatabaseFactory::getFactory()->getConnection();
@@ -33,26 +26,8 @@ class MessagerModel
         $query = $database->prepare($sql);
         $query->execute(array(':user_id' => Session::get('user_id')));
 
-        // fetchAll() is the PDO method that gets all result rows
         return $query->fetchAll();
     }
-
-//    /**
-//     * Get a single note
-//     * @param int $note_id id of the specific note
-//     * @return object a single object (the result)
-//     */
-//    public static function getNote($note_id)
-//    {
-//        $database = DatabaseFactory::getFactory()->getConnection();
-//
-//        $sql = "SELECT user_id, note_id, note_text FROM notes WHERE user_id = :user_id AND note_id = :note_id LIMIT 1";
-//        $query = $database->prepare($sql);
-//        $query->execute(array(':user_id' => Session::get('user_id'), ':note_id' => $note_id));
-//
-//        // fetch() is the PDO method that gets a single result
-//        return $query->fetch();
-//    }
 
     public static function getAllOtherUsers($currentUserId)
     {
@@ -68,15 +43,8 @@ class MessagerModel
         return $query->fetchAll();
     }
 
-    /**
-     * Set a note (create a new one)
-     * @param string $message_text note text that will be created
-     * @param int $empfaenger_id
-     * @return bool feedback (was the note created properly ?)
-     */
     public static function createMessage($message_text, $empfaenger_id)
     {
-
         if (!$message_text || strlen($message_text) == 0) {
             Session::add('feedback_negative', Text::get('FEEDBACK_NOTE_CREATION_FAILED'));
             return false;
@@ -93,65 +61,73 @@ class MessagerModel
             ':empfaenger_id' => $empfaenger_id,
             ':text'          => $message_text
         ]);
-
-        if ($query->rowCount() == 1) {
-            return true;
-        }
-
-        // default return
-        Session::add('feedback_negative', Text::get('FEEDBACK_NOTE_CREATION_FAILED'));
-        return false;
     }
 
-//    /**
-//     * Update an existing note
-//     * @param int $note_id id of the specific note
-//     * @param string $note_text new text of the specific note
-//     * @return bool feedback (was the update successful ?)
-//     */
-//    public static function updateNote($note_id, $note_text)
-//    {
-//        if (!$note_id || !$note_text) {
-//            return false;
-//        }
-//
-//        $database = DatabaseFactory::getFactory()->getConnection();
-//
-//        $sql = "UPDATE notes SET note_text = :note_text WHERE note_id = :note_id AND user_id = :user_id LIMIT 1";
-//        $query = $database->prepare($sql);
-//        $query->execute(array(':note_id' => $note_id, ':note_text' => $note_text, ':user_id' => Session::get('user_id')));
-//
-//        if ($query->rowCount() == 1) {
-//            return true;
-//        }
-//
-//        Session::add('feedback_negative', Text::get('FEEDBACK_NOTE_EDITING_FAILED'));
-//        return false;
-//    }
+    public static function getConversation($userId1, $userId2)
+    {
+        $database = DatabaseFactory::getFactory()->getConnection();
 
-//    /**
-//     * Delete a specific note
-//     * @param int $note_id id of the note
-//     * @return bool feedback (was the note deleted properly ?)
-//     */
-//    public static function deleteNote($note_id)
-//    {
-//        if (!$note_id) {
-//            return false;
-//        }
-//
-//        $database = DatabaseFactory::getFactory()->getConnection();
-//
-//        $sql = "DELETE FROM notes WHERE note_id = :note_id AND user_id = :user_id LIMIT 1";
-//        $query = $database->prepare($sql);
-//        $query->execute(array(':note_id' => $note_id, ':user_id' => Session::get('user_id')));
-//
-//        if ($query->rowCount() == 1) {
-//            return true;
-//        }
-//
-//        // default return
-//        Session::add('feedback_negative', Text::get('FEEDBACK_NOTE_DELETION_FAILED'));
-//        return false;
-//    }
+        $sql = "
+        SELECT 
+            m.id,
+            m.sender_id,
+            sender.user_name AS sender_name,
+            m.empfaenger_id,
+            empfaenger.user_name AS empfaenger_name,
+            m.text,
+            m.timestamp,
+            m.gelesen
+        FROM messages m
+        JOIN users sender ON sender.user_id = m.sender_id
+        JOIN users empfaenger ON empfaenger.user_id = m.empfaenger_id
+        WHERE 
+            (m.sender_id = :userId1 AND m.empfaenger_id = :userId2) 
+            OR (m.sender_id = :userId2 AND m.empfaenger_id = :userId1)
+        ORDER BY m.timestamp ASC
+        ";
+        $query = $database->prepare($sql);
+        $query->execute([
+            ':userId1' => $userId1,
+            ':userId2' => $userId2
+        ]);
+
+        return $query->fetchAll();
+    }
+
+    public static function getUnreadCounts($userId)
+    {
+        $database = DatabaseFactory::getFactory()->getConnection();
+
+        $sql = "
+        SELECT sender_id, COUNT(*) AS unread_count
+        FROM messages
+        WHERE empfaenger_id = :userId AND gelesen = 0
+        GROUP BY sender_id
+        ";
+        $query = $database->prepare($sql);
+        $query->execute([':userId' => $userId]);
+
+        $results = $query->fetchAll();
+
+        $unreadCounts = [];
+        foreach ($results as $row) {
+            $unreadCounts[$row->sender_id] = $row->unread_count;
+        }
+
+        return $unreadCounts;
+    }
+
+    public static function markMessagesAsRead($userId, $otherUserId)
+    {
+        $database = DatabaseFactory::getFactory()->getConnection();
+
+        $sql = "UPDATE messages SET gelesen = 1 WHERE empfaenger_id = :userId AND sender_id = :otherUserId AND gelesen = 0";
+
+        $query = $database->prepare($sql);
+
+        return $query->execute([
+            ':userId' => $userId,
+            ':otherUserId' => $otherUserId
+        ]);
+    }
 }

@@ -1,13 +1,8 @@
 <?php
 
-/**
- * The note controller: Just an example of simple create, read, update and delete (CRUD) actions.
- */
 class MessagerController extends Controller
 {
-    /**
-     * Construct this object by extending the basic Controller class
-     */
+
     public function __construct()
     {
         parent::__construct();
@@ -18,67 +13,61 @@ class MessagerController extends Controller
         Auth::checkAuthentication();
     }
 
-    /**
-     * This method controls what happens when you move to /note/index in your app.
-     * Gets all notes (of the user).
-     */
-    public function index()
+    public function index($selectedUserId = null)
     {
         $currentUserId = Session::get('user_id');
 
         $users = MessagerModel::getAllOtherUsers($currentUserId);
-        $messages = MessagerModel::getAllMessageByUser();
+
+        if ($selectedUserId === null) {
+            // Default to first user in list
+            $selectedUserId = count($users) > 0 ? $users[0]->user_id : null;
+        } else {
+            // Convert param to int and verify
+            $selectedUserId = (int)$selectedUserId;
+        }
+
+        // Mark messages as read for the selected user
+        if ($selectedUserId !== null) {
+            MessagerModel::markMessagesAsRead($currentUserId, $selectedUserId);
+        }
+
+        // Get conversation messages between current user and selected user
+        $messages = [];
+        if ($selectedUserId !== null) {
+            $messages = MessagerModel::getConversation($currentUserId, $selectedUserId);
+        }
+
+        // Get unread counts for users
+        $unreadCounts = MessagerModel::getUnreadCounts($currentUserId);
 
         $this->View->render('messager/index', array(
-            'messager' => MessagerModel::getAllMessageByUser(),
             'users' => $users,
-            'messages' => $messages
+            'messages' => $messages,
+            'selectedUserId' => $selectedUserId,
+            'unreadCounts' => $unreadCounts
         ));
     }
 
-    /**
-     * This method controls what happens when you move to /dashboard/create in your app.
-     * Creates a new note. This is usually the target of form submit actions.
-     * POST request.
-     */
     public function create()
     {
         MessagerModel::createMessage(Request::post('messager_text'), Request::post('empfaenger_id'));
         Redirect::to('messager');
     }
 
-//    /**
-//     * This method controls what happens when you move to /note/edit(/XX) in your app.
-//     * Shows the current content of the note and an editing form.
-//     * @param $note_id int id of the note
-//     */
-//    public function edit($note_id)
-//    {
-//        $this->View->render('note/edit', array(
-//            'note' => NoteModel::getNote($note_id)
-//        ));
-//    }
+    public function ajaxGetMessages($otherUserId)
+    {
+        $currentUserId = Session::get('user_id');
+        $otherUserId = (int)$otherUserId;
 
-//    /**
-//     * This method controls what happens when you move to /note/editSave in your app.
-//     * Edits a note (performs the editing after form submit).
-//     * POST request.
-//     */
-//    public function editSave()
-//    {
-//        NoteModel::updateNote(Request::post('note_id'), Request::post('note_text'));
-//        Redirect::to('note');
-//    }
+        // Mark messages as read
+        MessagerModel::markMessagesAsRead($currentUserId, $otherUserId);
 
-//    /**
-//     * This method controls what happens when you move to /note/delete(/XX) in your app.
-//     * Deletes a note. In a real application a deletion via GET/URL is not recommended, but for demo purposes it's
-//     * totally okay.
-//     * @param int $note_id id of the note
-//     */
-//    public function delete($note_id)
-//    {
-//        NoteModel::deleteNote($note_id);
-//        Redirect::to('note');
-//    }
+        $messages = MessagerModel::getConversation($currentUserId, $otherUserId);
+
+        // Output safely as JSON.
+        header('Content-Type: application/json');
+        echo json_encode($messages);
+        exit();
+    }
 }

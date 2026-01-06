@@ -9,6 +9,9 @@
     <!-- CSS -->
     <link rel="stylesheet" href="<?php echo Config::get('URL'); ?>css/style.css" />
 
+
+    <link rel="stylesheet" href="<?php echo Config::get('URL'); ?>css/messager.css">
+
     <!-- jQuery und DataTables einfügen -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
             integrity="sha256-/xUj+3OJ5lG6GXsFhXkPfkLksyn7OyeDvej/mdw="
