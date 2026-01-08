@@ -25,6 +25,8 @@
     <script type="text/javascript"
             src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 
+    <script src="https://www.google.com/recaptcha/api.js?render=6Le_6UMsAAAAAO-Xe5S9uY_KGSEnJXwjJry9uN2y"></script>
+
     <!-- Init DataTable -->
     <script>
         $(document).ready(function () {

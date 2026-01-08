@@ -379,4 +379,17 @@ class LoginModel
     {
         return Session::userIsLoggedIn();
     }
+    public static function verifyCaptcha()
+    {
+
+        if (empty($_POST['recaptcha_token'])) return false;
+
+        $secret = '6Le_6UMsAAAAAKlutEfQKwGPEyAcKV-hp9dO_OlA';
+
+        $res = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=".$_POST['recaptcha_token']);
+        $result = json_decode($res);
+
+        return $result->success && $result->action === 'login' && $result->score >= 0.3;
+    }
+
 }

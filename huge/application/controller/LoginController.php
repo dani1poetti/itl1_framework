@@ -21,6 +21,9 @@ class LoginController extends Controller
      */
     public function index()
     {
+
+
+
         // if user is logged in redirect to main-page, if not show the view
         if (LoginModel::isUserLoggedIn()) {
             Redirect::home();
@@ -35,19 +38,28 @@ class LoginController extends Controller
      */
     public function login()
     {
-        // check if csrf token is valid
+        // CSRF bleibt wie gehabt
         if (!Csrf::isTokenValid()) {
             LoginModel::logout();
             Redirect::home();
             exit();
         }
 
-        // perform the login method, put result (true or false) into $login_successful
+        // 🛡️ reCAPTCHA v3 HIER einbauen
+        if (!LoginModel::verifyCaptcha()) {
+            Session::add('feedback_negative', 'reCAPTCHA blockiert (Bot erkannt)');
+            Redirect::to('login/index');
+            return;
+        }
+
+        // Erst danach darf der echte Login passieren
         $login_successful = LoginModel::login(
-            Request::post('user_name'), Request::post('user_password'), Request::post('set_remember_me_cookie')
+            Request::post('user_name'),
+            Request::post('user_password'),
+            Request::post('set_remember_me_cookie')
         );
 
-        // check login status: if true, then redirect user to user/index, if false, then to login form again
+        // Dein Redirect-Block bleibt 1:1 gleich
         if ($login_successful) {
             if (Request::post('redirect')) {
                 Redirect::toPreviousViewedPageAfterLogin(ltrim(urldecode(Request::post('redirect')), '/'));
@@ -62,6 +74,7 @@ class LoginController extends Controller
             }
         }
     }
+
 
     /**
      * The logout action

@@ -31,7 +31,21 @@
 							2. http://stackoverflow.com/questions/15602473/is-csrf-protection-necessary-on-a-sign-up-form?lq=1
 							3. http://stackoverflow.com/questions/13667437/how-to-add-csrf-token-to-login-form?lq=1
 					-->
-					<input type="hidden" name="csrf_token" value="<?= Csrf::makeToken(); ?>" />
+                    <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+                    <script>
+                        document.querySelector("form").addEventListener("submit", function(e){
+                            e.preventDefault(); // Formular stoppens
+
+                            grecaptcha.execute('6Le_6UMsAAAAAO-Xe5S9uY_KGSEnJXwjJry9uN2y', {action: 'login'}).then(function(token){
+                                document.getElementById("recaptcha_token").value = token;
+
+                                e.target.submit(); // Formular mit frischem Token absenden
+                            });
+                        });
+                    </script>
+
+
+                    <input type="hidden" name="csrf_token" value="<?= Csrf::makeToken(); ?>" />
                     <input type="submit" class="login-submit-button" value="Log in"/>
                 </form>
                 <div class="link-forgot-my-password">
