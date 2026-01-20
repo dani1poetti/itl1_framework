@@ -20,7 +20,7 @@ class UserModel
         $database = DatabaseFactory::getFactory()->getConnection();
 
         //Abfrage der Daten
-        $sql = "SELECT user_id, user_name, user_email, user_account_type, user_active, user_has_avatar, user_deleted FROM users";
+        $sql = "CALL sp_get_all_user_profiles()";
         $query = $database->prepare($sql);
         $query->execute();
 
@@ -59,8 +59,7 @@ class UserModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "SELECT user_id, user_name, user_email, user_active, user_has_avatar, user_deleted
-                FROM users WHERE user_id = :user_id LIMIT 1";
+        $sql = "CALL sp_get_user_profile(:user_id)";
         $query = $database->prepare($sql);
         $query->execute(array(':user_id' => $user_id));
 
@@ -93,9 +92,7 @@ class UserModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $query = $database->prepare("SELECT user_id, user_name, user_email FROM users
-                                     WHERE (user_name = :user_name_or_email OR user_email = :user_name_or_email)
-                                           AND user_provider_type = :provider_type LIMIT 1");
+        $query = $database->prepare("CALL sp_get_user_by_name_or_email(:user_name_or_email, :provider_type)");
         $query->execute(array(':user_name_or_email' => $user_name_or_email, ':provider_type' => 'DEFAULT'));
 
         return $query->fetch();
@@ -112,7 +109,7 @@ class UserModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $query = $database->prepare("SELECT user_id FROM users WHERE user_name = :user_name LIMIT 1");
+        $query = $database->prepare("CALL sp_userid_by_username(:user_name)");
         $query->execute(array(':user_name' => $user_name));
         if ($query->rowCount() == 0) {
             return false;
@@ -131,7 +128,7 @@ class UserModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $query = $database->prepare("SELECT user_id FROM users WHERE user_email = :user_email LIMIT 1");
+        $query = $database->prepare("CALL sp_userid_by_email(:user_email)");
         $query->execute(array(':user_email' => $user_email));
         if ($query->rowCount() == 0) {
             return false;
@@ -151,8 +148,8 @@ class UserModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $query = $database->prepare("UPDATE users SET user_name = :user_name WHERE user_id = :user_id LIMIT 1");
-        $query->execute(array(':user_name' => $new_user_name, ':user_id' => $user_id));
+        $query = $database->prepare("CALL sp_update_user_name(:user_id, :user_name)");
+        $query->execute(array(':user_id' => $user_id, ':user_name' => $new_user_name));
         if ($query->rowCount() == 1) {
             return true;
         }
@@ -171,8 +168,8 @@ class UserModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $query = $database->prepare("UPDATE users SET user_email = :user_email WHERE user_id = :user_id LIMIT 1");
-        $query->execute(array(':user_email' => $new_user_email, ':user_id' => $user_id));
+        $query = $database->prepare("CALL sp_update_user_email(:user_id, :user_email)");
+        $query->execute(array(':user_id' => $user_id, ':user_email' => $new_user_email));
         $count = $query->rowCount();
         if ($count == 1) {
             return true;
@@ -283,8 +280,8 @@ class UserModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "SELECT user_id FROM users WHERE user_name = :user_name AND user_provider_type = :provider_type LIMIT 1";
-        $query = $database->prepare($sql);
+        $query = $database->prepare("CALL sp_userid_by_username_and_provider(:user_name, :provider_type)");
+        $query->execute(array(':user_name' => $user_name, ':provider_type' => 'DEFAULT'));
 
         // DEFAULT is the marker for "normal" accounts (that have a password etc.)
         // There are other types of accounts that don't have passwords etc. (FACEBOOK)

@@ -7,22 +7,7 @@ class MessagerModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "
-        SELECT 
-            m.id,
-            m.sender_id,
-            sender.user_name AS sender_name,
-            m.empfaenger_id,
-            empfaenger.user_name AS empfaenger_name,
-            m.text,
-            m.timestamp,
-            m.gelesen
-        FROM messages m
-        JOIN users sender ON sender.user_id = m.sender_id
-        JOIN users empfaenger ON empfaenger.user_id = m.empfaenger_id
-        WHERE m.empfaenger_id = :user_id
-        ORDER BY m.timestamp DESC
-    ";
+        $sql = "CALL sp_get_all_messages_by_user(:user_id)";
         $query = $database->prepare($sql);
         $query->execute(array(':user_id' => Session::get('user_id')));
 
@@ -33,10 +18,7 @@ class MessagerModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "SELECT user_id, user_name 
-            FROM users 
-            WHERE user_id != :current_user_id";
-
+        $sql = "SELECT user_id, user_name FROM users WHERE user_id != :current_user_id";
         $query = $database->prepare($sql);
         $query->execute([':current_user_id' => $currentUserId]);
 
@@ -52,8 +34,7 @@ class MessagerModel
 
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "INSERT INTO messages (sender_id, empfaenger_id, text, gelesen) VALUES (:sender_id, :empfaenger_id, :text, 0)";
-
+        $sql = "CALL sp_create_message(:sender_id, :empfaenger_id, :text)";
         $query = $database->prepare($sql);
 
         return $query->execute([
@@ -67,24 +48,7 @@ class MessagerModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "
-        SELECT 
-            m.id,
-            m.sender_id,
-            sender.user_name AS sender_name,
-            m.empfaenger_id,
-            empfaenger.user_name AS empfaenger_name,
-            m.text,
-            m.timestamp,
-            m.gelesen
-        FROM messages m
-        JOIN users sender ON sender.user_id = m.sender_id
-        JOIN users empfaenger ON empfaenger.user_id = m.empfaenger_id
-        WHERE 
-            (m.sender_id = :userId1 AND m.empfaenger_id = :userId2) 
-            OR (m.sender_id = :userId2 AND m.empfaenger_id = :userId1)
-        ORDER BY m.timestamp ASC
-        ";
+        $sql = "CALL sp_get_conversation(:userId1, :userId2)";
         $query = $database->prepare($sql);
         $query->execute([
             ':userId1' => $userId1,
@@ -98,12 +62,7 @@ class MessagerModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "
-        SELECT sender_id, COUNT(*) AS unread_count
-        FROM messages
-        WHERE empfaenger_id = :userId AND gelesen = 0
-        GROUP BY sender_id
-        ";
+        $sql = "SELECT sender_id, COUNT(*) AS unread_count FROM messages WHERE empfaenger_id = :userId AND gelesen = 0 GROUP BY sender_id";
         $query = $database->prepare($sql);
         $query->execute([':userId' => $userId]);
 
@@ -121,10 +80,8 @@ class MessagerModel
     {
         $database = DatabaseFactory::getFactory()->getConnection();
 
-        $sql = "UPDATE messages SET gelesen = 1 WHERE empfaenger_id = :userId AND sender_id = :otherUserId AND gelesen = 0";
-
+        $sql = "CALL sp_mark_messages_as_read(:userId, :otherUserId)";
         $query = $database->prepare($sql);
-
         return $query->execute([
             ':userId' => $userId,
             ':otherUserId' => $otherUserId

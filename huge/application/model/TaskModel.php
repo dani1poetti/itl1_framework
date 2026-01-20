@@ -11,7 +11,7 @@ class TaskModel
     public static function createTask($title, $description)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $sql = "INSERT INTO tasks (title, description, status, created_at) VALUES (:title, :description, 'offen', NOW())";
+        $sql = "CALL sp_create_task(:title, :description)";
         $query = $db->prepare($sql);
         $parameters = array(':title' => $title, ':description' => $description);
         return $query->execute($parameters);
@@ -23,7 +23,7 @@ class TaskModel
     public static function getAllTasks()
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $sql = "SELECT * FROM tasks ORDER BY created_at DESC";
+        $sql = "CALL sp_get_all_tasks()";
         $query = $db->prepare($sql);
         $query->execute();
         return $query->fetchAll();
@@ -35,9 +35,9 @@ class TaskModel
     public static function updateStatus($id, $status)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $sql = "UPDATE tasks SET status = :status WHERE id = :id";
+        $sql = "CALL sp_update_task_status(:id, :status)";
         $query = $db->prepare($sql);
-        $parameters = array(':status' => $status, ':id' => $id);
+        $parameters = array(':id' => $id, ':status' => $status);
         return $query->execute($parameters);
     }
 
@@ -47,7 +47,7 @@ class TaskModel
     public static function deleteTask($id)
     {
         $db = DatabaseFactory::getFactory()->getConnection();
-        $sql = "DELETE FROM tasks WHERE id = :id";
+        $sql = "CALL sp_delete_task(:id)";
         $query = $db->prepare($sql);
         $parameters = array(':id' => $id);
         return $query->execute($parameters);

@@ -77,10 +77,9 @@ class Session
     public static function updateSessionId($userId, $sessionId = null)
     {
         $database = DatabaseFactory::getFactory()->getConnection();
-        $sql = "UPDATE users SET session_id = :session_id WHERE user_id = :user_id";
-
+        $sql = "CALL sp_update_session_id(:user_id, :session_id)";
         $query = $database->prepare($sql);
-        $query->execute(array(':session_id' => $sessionId, ":user_id" => $userId));
+        $query->execute(array(':user_id' => $userId, ':session_id' => $sessionId));
     }
 
     /**
@@ -109,11 +108,9 @@ class Session
         if (isset($userId) && isset($session_id)) {
 
             $database = DatabaseFactory::getFactory()->getConnection();
-            $sql = "SELECT session_id FROM users WHERE user_id = :user_id LIMIT 1";
-
+            $sql = "CALL sp_get_session_id(:user_id)";
             $query = $database->prepare($sql);
-            $query->execute(array(":user_id" => $userId));
-
+            $query->execute(array(':user_id' => $userId));
             $result = $query->fetch();
             $userSessionId = !empty($result)? $result->session_id: null;
 
