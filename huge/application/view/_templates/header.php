@@ -78,6 +78,9 @@
                 <li <?php if (View::checkForActiveController($filename, "task")) { echo ' class="active" '; } ?> >
                     <a href="<?php echo Config::get('URL'); ?>task/index">Aufgaben</a>
                 </li>
+                <li <?php if (View::checkForActiveController($filename, "gallery")) { echo ' class="active" '; } ?> >
+                    <a href="<?php echo Config::get('URL'); ?>gallery/index">Bilder</a>
+                </li>
             <?php } ?>
         </ul>
 
